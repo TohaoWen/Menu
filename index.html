@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>专属小食堂 ❤️</title>
+  <style>
+    :root {
+      --primary: #ff6b6b;
+      --primary-gradient: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      --bg-color: #f7f9fc;
+      --surface: rgba(255, 255, 255, 0.9);
+      --text-main: #2d3436;
+      --text-muted: #636e72;
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 120px;
+      overflow-x: hidden;
+      background-image: radial-gradient(circle at top right, #ffefef 0%, transparent 40%),
+        radial-gradient(circle at bottom left, #eef5ff 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* Utilites */
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .btn {
+      border: none;
+      outline: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: white;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 999px;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      animation: slideDown 0.6s ease;
+    }
+
+    header h1 {
+      font-size: 26px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Dish Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .dish-card {
+      display: flex;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transform-origin: center;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .dish-img {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dish-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+
+    .dish-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .dish-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .action-area {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 8px;
+      min-height: 36px;
+    }
+
+    .add-btn {
+      padding: 8px 20px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.1);
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+    }
+
+    .count {
+      font-size: 16px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Floating Bar */
+    .floating-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      width: calc(100% - 40px);
+      max-width: 560px;
+      padding: 16px 24px;
+      border-radius: 999px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .floating-bar.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .cart-summary {
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: flex-end;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      width: 100%;
+      background: var(--surface);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 30px 24px;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .time-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .time-chip {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: white;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .time-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .remarks-input {
+      width: 100%;
+      height: 100px;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.7);
+      resize: none;
+      font-family: inherit;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    .remarks-input:focus {
+      border-color: var(--primary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    .action-buttons .btn {
+      flex: 1;
+      font-size: 16px;
+      padding: 14px;
+    }
+
+    .btn-secondary {
+      background: #f1f3f5;
+      color: var(--text-main);
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #4caf50;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      z-index: 2000;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header class="glass">
+      <h1>专属小食堂 🧑‍🍳</h1>
+      <p>宝，今天想吃点什么拿手好菜？</p>
+    </header>
+
+    <main class="grid" id="dish-list">
+      <!-- Dishes will be injected here -->
+    </main>
+  </div>
+
+  <div class="floating-bar glass" id="floating-bar">
+    <div class="cart-summary">
+      <span>🛒 已经选了</span>
+      <span class="badge" id="total-count">0</span>
+      <span>个菜</span>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">去下单</button>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOutsideClick(event)">
+    <div class="modal-content glass" onclick="event.stopPropagation()">
+      <div class="modal-header">确认小票 🧾</div>
+
+      <div class="form-group">
+        <label class="form-label">什么时候吃？ 🕒 <span style="color:var(--primary);">*</span></label>
+        <input type="text" id="time-input" class="remarks-input" style="height: 50px;" placeholder="自己输入，如：今晚七点半、明天下班后">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">给大厨的打赏 💝 <span style="color:var(--primary);">*</span></label>
+        <div class="time-selector" id="tip-selector">
+          <!-- Tip chips will be injected here -->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">想对大厨说什么？ 📝</label>
+        <textarea id="remarks" class="remarks-input" placeholder="例如：少放点辣，我想喝一杯果茶..."></textarea>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="closeModal()">再看看</button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitOrder()">呼叫大厨！🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">点单成功！大厨已收到！</div>
+
+  <script>
+    // ==========================================
+    // 配置区域 (Configuration)
+    // 请在此填入你的 Server酱 SendKey
+    // 申请地址: https://sct.ftqq.com/
+    // ==========================================
+    const SERVER_CHAN_KEY = 'SCT329944TA4qYIqEUzAmUTd1ePP7x4Biq';
+
+    // 菜单数据
+    const dishes = [
+      {
+        id: 'apple_ribs',
+        name: '苹果炖排骨',
+        desc: '果香四溢，排骨软烂，酸甜开胃解腻',
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=400&h=300'
+      },
+      {
+        id: 'ginger_duck',
+        name: '姜爆鸭',
+        desc: '仔姜爆炒，鲜香麻辣，超级下饭的神器',
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=300'
+      },
+      {
+        id: 'chicken_claws',
+        name: '卤香鸡爪',
+        desc: '秘制卤料，软糯脱骨，追剧必备小吃',
+        image: 'https://images.unsplash.com/photo-1541614101331-1a5a3a194e92?auto=format&fit=crop&q=80&w=400&h=300'
+      },
+      {
+        id: 'spicy_chicken',
+        name: '爆炒酸辣鸡',
+        desc: '酸辣过瘾，肉质滑嫩，越吃越停不下来',
+        image: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&q=80&w=400&h=300'
+      }
+    ];
+
+    const tipOptions = ['Kiss 啵啵 😘', '微信大红包 🧧', '大大的拥抱 🤗', '免洗碗券一张 🍽️', '周末看电影 🎬'];
+
+    // 状态管理
+    const state = {
+      cart: {}, // { id: count }
+      selectedTip: '',
+      remarks: ''
+    };
+
+    // DOM Elements
+    const dishListEl = document.getElementById('dish-list');
+    const floatingBarEl = document.getElementById('floating-bar');
+    const totalCountEl = document.getElementById('total-count');
+    const tipSelectorEl = document.getElementById('tip-selector');
+    const timeInputEl = document.getElementById('time-input');
+    const remarksEl = document.getElementById('remarks');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const submitBtn = document.getElementById('submit-btn');
+    const toast = document.getElementById('toast');
+
+    // 初始化渲染
+    function init() {
+      renderDishes();
+      renderTipOptions();
+    }
+
+    // 更新购物车
+    function updateCart(id, delta) {
+      if (!state.cart[id]) state.cart[id] = 0;
+      state.cart[id] += delta;
+      if (state.cart[id] < 0) state.cart[id] = 0;
+
+      renderDishes();
+      updateFloatingBar();
+
+      // 添加触觉反馈 (如果设备支持)
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function getTotalCount() {
+      return Object.values(state.cart).reduce((a, b) => a + b, 0);
+    }
+
+    // 渲染菜品列表
+    function renderDishes() {
+      dishListEl.innerHTML = dishes.map(dish => {
+        const count = state.cart[dish.id] || 0;
+
+        let actionHTML = '';
+        if (count === 0) {
+          actionHTML = `<button class="btn add-btn" onclick="updateCart('${dish.id}', 1)">来一份</button>`;
+        } else {
+          actionHTML = `
+            <div class="stepper">
+              <button class="btn step-btn" onclick="updateCart('${dish.id}', -1)">-</button>
+              <span class="count">${count}</span>
+              <button class="btn step-btn" onclick="updateCart('${dish.id}', 1)">+</button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="dish-card glass">
+            <img src="${dish.image}" alt="${dish.name}" class="dish-img">
+            <div class="dish-info">
+              <div>
+                <div class="dish-title">${dish.name}</div>
+                <div class="dish-desc">${dish.desc}</div>
+              </div>
+              <div class="action-area">
+                ${actionHTML}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染底部浮窗
+    function updateFloatingBar() {
+      const total = getTotalCount();
+      totalCountEl.innerText = total;
+      if (total > 0) {
+        floatingBarEl.classList.add('active');
+      } else {
+        floatingBarEl.classList.remove('active');
+      }
+    }
+
+    // 渲染打赏选择
+    function renderTipOptions() {
+      tipSelectorEl.innerHTML = tipOptions.map(t => `
+        <button 
+          class="btn time-chip ${state.selectedTip === t ? 'active' : ''}" 
+          onclick="selectTip('${t}')"
+        >${t}</button>
+      `).join('');
+    }
+
+    function selectTip(t) {
+      state.selectedTip = t;
+      renderTipOptions();
+    }
+
+    // 模态框控制
+    function openModal() {
+      modalOverlay.classList.add('active');
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+    }
+
+    function closeModalOnOutsideClick(e) {
+      if (e.target === modalOverlay) closeModal();
+    }
+
+    function showToast() {
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // 提交订单到 Server酱
+    async function submitOrder() {
+      if (!SERVER_CHAN_KEY) {
+        alert('请先在源代码(index.html)中配置 SERVER_CHAN_KEY 才能发送通知哦！\n不过你可以假装已经发送了。');
+      }
+
+      const timeVal = timeInputEl.value.trim();
+      if (!timeVal) {
+        alert('宝，记得填一下什么时候吃哦！');
+        return;
+      }
+      if (!state.selectedTip) {
+        alert('宝，大厨真的很需要打赏，选一个嘛！');
+        return;
+      }
+
+      state.remarks = remarksEl.value;
+      const total = getTotalCount();
+
+      let dishDetails = dishes
+        .filter(d => state.cart[d.id] > 0)
+        .map(d => `- ${d.name} x${state.cart[d.id]}`)
+        .join('\n\n');
+
+      const title = encodeURIComponent('老婆下单啦！👩‍🍳');
+      const desp = encodeURIComponent(`
+**想吃的时间**：${timeVal}
+
+**🍽️ 点的菜单**：
+${dishDetails}
+
+**🎁 给大厨的打赏**：
+${state.selectedTip}
+
+**📝 留言备注**：
+${state.remarks || '无'}
+      `);
+
+      submitBtn.classList.add('loading');
+      submitBtn.innerText = '发送中...';
+
+      // 发送请求，无论配置与否都模拟成功效果保护体验
+      try {
+        if (SERVER_CHAN_KEY) {
+          // Server酱 支持 GET 请求发送消息
+          const url = `https://sctapi.ftqq.com/${SERVER_CHAN_KEY}.send?title=${title}&desp=${desp}`;
+          await fetch(url, { method: 'GET', mode: 'no-cors' }); // no-cors 避免跨域报错
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setTimeout(() => {
+          submitBtn.classList.remove('loading');
+          submitBtn.innerText = '呼叫大厨！🚀';
+          closeModal();
+
+          state.cart = {};
+          remarksEl.value = '';
+          timeInputEl.value = '';
+          state.selectedTip = '';
+          init();
+          updateFloatingBar();
+
+          showToast();
+        }, 800);
+      }
+    }
+
+    // 启动
+    init();
+  </script>
+</body>
+
+</html>
