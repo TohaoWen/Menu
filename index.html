@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>专属小食堂 ❤️</title>
+  <title>大丫专属小食堂 ❤️</title>
   <style>
     :root {
       --primary: #ff6b6b;
@@ -120,6 +120,68 @@
       height: 1px;
       background: linear-gradient(to right, var(--primary), transparent);
       opacity: 0.2;
+    }
+
+    /* Menu Container & Sidebar Layout */
+    .menu-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .sidebar {
+      width: 90px;
+      position: sticky;
+      top: 20px;
+      flex-shrink: 0;
+      border-radius: var(--radius-md);
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sidebar-item {
+      padding: 16px 8px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      line-height: 1.4;
+    }
+
+    .sidebar-item.active {
+      color: var(--primary);
+      font-weight: bold;
+      background: rgba(255, 107, 107, 0.08);
+    }
+    
+    .sidebar-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding-bottom: 20px;
     }
 
     /* Dish Grid */
@@ -431,9 +493,14 @@
       <p>宝，今天想吃点什么拿手好菜？</p>
     </header>
 
-    <main id="dish-list">
-      <!-- Categories and dishes will be injected here -->
-    </main>
+    <div class="menu-container">
+      <aside class="sidebar glass" id="sidebar">
+        <!-- Sidebar items will be injected here -->
+      </aside>
+      <main id="dish-list" class="main-content">
+        <!-- Categories and dishes will be injected here -->
+      </main>
+    </div>
   </div>
 
   <div class="floating-bar glass" id="floating-bar">
@@ -538,6 +605,7 @@
 
     // DOM Elements
     const dishListEl = document.getElementById('dish-list');
+    const sidebarEl = document.getElementById('sidebar');
     const floatingBarEl = document.getElementById('floating-bar');
     const totalCountEl = document.getElementById('total-count');
     const tipSelectorEl = document.getElementById('tip-selector');
@@ -549,8 +617,62 @@
 
     // 初始化渲染
     function init() {
+      renderSidebar();
       renderDishes();
       renderTipOptions();
+      setupScrollSpy();
+    }
+
+    // 渲染侧边栏
+    function renderSidebar() {
+      sidebarEl.innerHTML = menuCategories.map((category, index) => {
+        // Replace spaces with <br> for better stacking in narrow sidebar
+        const nameHtml = category.name.replace(/ /g, '<br>');
+        return `
+          <div class="sidebar-item ${index === 0 ? 'active' : ''}" 
+               id="nav-${category.id}" 
+               onclick="scrollToCategory('${category.id}')">
+            ${nameHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 滚动到指定分类
+    function scrollToCategory(id) {
+      const el = document.getElementById(`category-${id}`);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+
+    // 设置滚动监听
+    function setupScrollSpy() {
+      // Small delay to ensure elements are rendered
+      setTimeout(() => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id.replace('category-', '');
+              document.querySelectorAll('.sidebar-item').forEach(el => {
+                el.classList.remove('active');
+              });
+              const activeNav = document.getElementById(`nav-${id}`);
+              if (activeNav) {
+                activeNav.classList.add('active');
+              }
+            }
+          });
+        }, {
+          rootMargin: '-20% 0px -80% 0px' // Trigger category change closer to top
+        });
+
+        menuCategories.forEach(c => {
+          const el = document.getElementById(`category-${c.id}`);
+          if (el) observer.observe(el);
+        });
+      }, 100);
     }
 
     // 更新购物车
@@ -573,8 +695,8 @@
     // 渲染菜品列表（带分区）
     function renderDishes() {
       dishListEl.innerHTML = menuCategories.map(category => {
-        const categoryHead = `<div class="category-title">${category.name}</div>`;
-        
+        const categoryHead = `<div class="category-title" id="category-${category.id}">${category.name}</div>`;
+
         const dishesHTML = category.dishes.map(dish => {
           const count = state.cart[dish.id] || 0;
 
