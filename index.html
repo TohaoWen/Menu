@@ -94,6 +94,34 @@
       color: var(--text-muted);
     }
 
+    /* Category Title */
+    .category-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary);
+      margin: 32px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-title::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .category-title::after {
+      content: "";
+      flex-grow: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--primary), transparent);
+      opacity: 0.2;
+    }
+
     /* Dish Grid */
     .grid {
       display: grid;
@@ -403,8 +431,8 @@
       <p>宝，今天想吃点什么拿手好菜？</p>
     </header>
 
-    <main class="grid" id="dish-list">
-      <!-- Dishes will be injected here -->
+    <main id="dish-list">
+      <!-- Categories and dishes will be injected here -->
     </main>
   </div>
 
@@ -455,33 +483,49 @@
     // ==========================================
     const SERVER_CHAN_KEY = 'SCT329944TA4qYIqEUzAmUTd1ePP7x4Biq';
 
-    // 菜单数据
-    const dishes = [
+    // 菜单分类与数据
+    const menuCategories = [
       {
-        id: 'apple_ribs',
-        name: '苹果炖排骨',
-        desc: '果香四溢，排骨软烂，酸甜开胃解腻',
-        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=400&h=300'
+        id: 'meat',
+        name: '大口吃肉 🥩',
+        dishes: [
+          { id: 'apple_ribs', name: '苹果炖排骨', desc: '果香四溢，排骨软烂，酸甜开胃解腻', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'ginger_duck', name: '姜爆鸭', desc: '仔姜爆炒，鲜香麻辣，超级下饭的神器', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'hongshaorou', name: '秘制红烧肉', desc: '肥而不腻，入口即化，肉汁拌饭一绝', image: 'https://images.unsplash.com/photo-1555196301-3ccfb7daebde?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'bbq_beef', name: '铁板黑椒牛肉', desc: '肉质鲜嫩，黑椒浓郁，听见滋滋作响', image: 'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&q=80&w=400&h=300' },
+        ]
       },
       {
-        id: 'ginger_duck',
-        name: '姜爆鸭',
-        desc: '仔姜爆炒，鲜香麻辣，超级下饭的神器',
-        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=300'
+        id: 'hotpot',
+        name: '暖胃鲜汤 / 火锅 🍲',
+        dishes: [
+          { id: 'tomato_hotpot', name: '浓汤番茄肥牛', desc: '酸甜开胃，汤头浓郁，热腾腾的满足', image: 'https://images.unsplash.com/photo-1548943487-a2e41434ad91?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'chicken_soup', name: '当归老鸡汤', desc: '滋补养生，浓郁鲜美，暖心暖胃', image: 'https://images.unsplash.com/photo-1563379926898-05f45c514d71?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'ribs_corn_soup', name: '排骨玉米板栗汤', desc: '清甜不腻，鲜香味美，满满的安全感', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=400&h=300' }
+        ]
       },
       {
-        id: 'chicken_claws',
-        name: '卤香鸡爪',
-        desc: '秘制卤料，软糯脱骨，追剧必备小吃',
-        image: 'https://images.unsplash.com/photo-1541614101331-1a5a3a194e92?auto=format&fit=crop&q=80&w=400&h=300'
+        id: 'veggie',
+        name: '清新解腻素菜 🥬',
+        dishes: [
+          { id: 'baocai', name: '干锅手撕包菜', desc: '爽脆微辣，超级下饭的经典素菜', image: 'https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'tudousi', name: '酸辣土豆丝', desc: '脆爽鲜香，闭眼点不用想', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'broccoli', name: '蒜蓉西蓝花', desc: '健康少油，脆绿爽口，低卡优选', image: 'https://images.unsplash.com/photo-1590161803764-f3c5f49e4822?auto=format&fit=crop&q=80&w=400&h=300' }
+        ]
       },
       {
-        id: 'spicy_chicken',
-        name: '爆炒酸辣鸡',
-        desc: '酸辣过瘾，肉质滑嫩，越吃越停不下来',
-        image: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&q=80&w=400&h=300'
+        id: 'snack',
+        name: '解馋小吃 / 零嘴 🍡',
+        dishes: [
+          { id: 'chicken_claws', name: '秘制卤凤爪', desc: '软糯脱骨，酱香浓郁，追剧必备', image: 'https://images.unsplash.com/photo-1541614101331-1a5a3a194e92?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'spicy_chicken', name: '火爆酸辣鸡丁', desc: '酸爽香辣，越吃越上头', image: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&q=80&w=400&h=300' },
+          { id: 'fried_pork', name: '干炸小酥肉', desc: '外酥里嫩，一口一块停不下来', image: 'https://images.unsplash.com/photo-1610440042657-612c34d95e9f?auto=format&fit=crop&q=80&w=400&h=300' }
+        ]
       }
     ];
+
+    // 获取所有菜品的扁平数组（方便后续查询）
+    const allDishes = menuCategories.flatMap(c => c.dishes);
 
     const tipOptions = ['Kiss 啵啵 😘', '微信大红包 🧧', '大大的拥抱 🤗', '免洗碗券一张 🍽️', '周末看电影 🎬'];
 
@@ -526,38 +570,44 @@
       return Object.values(state.cart).reduce((a, b) => a + b, 0);
     }
 
-    // 渲染菜品列表
+    // 渲染菜品列表（带分区）
     function renderDishes() {
-      dishListEl.innerHTML = dishes.map(dish => {
-        const count = state.cart[dish.id] || 0;
+      dishListEl.innerHTML = menuCategories.map(category => {
+        const categoryHead = `<div class="category-title">${category.name}</div>`;
+        
+        const dishesHTML = category.dishes.map(dish => {
+          const count = state.cart[dish.id] || 0;
 
-        let actionHTML = '';
-        if (count === 0) {
-          actionHTML = `<button class="btn add-btn" onclick="updateCart('${dish.id}', 1)">来一份</button>`;
-        } else {
-          actionHTML = `
-            <div class="stepper">
-              <button class="btn step-btn" onclick="updateCart('${dish.id}', -1)">-</button>
-              <span class="count">${count}</span>
-              <button class="btn step-btn" onclick="updateCart('${dish.id}', 1)">+</button>
+          let actionHTML = '';
+          if (count === 0) {
+            actionHTML = `<button class="btn add-btn" onclick="updateCart('${dish.id}', 1)">来一份</button>`;
+          } else {
+            actionHTML = `
+              <div class="stepper">
+                <button class="btn step-btn" onclick="updateCart('${dish.id}', -1)">-</button>
+                <span class="count">${count}</span>
+                <button class="btn step-btn" onclick="updateCart('${dish.id}', 1)">+</button>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="dish-card glass">
+              <img src="${dish.image}" alt="${dish.name}" class="dish-img">
+              <div class="dish-info">
+                <div>
+                  <div class="dish-title">${dish.name}</div>
+                  <div class="dish-desc">${dish.desc}</div>
+                </div>
+                <div class="action-area">
+                  ${actionHTML}
+                </div>
+              </div>
             </div>
           `;
-        }
+        }).join('');
 
-        return `
-          <div class="dish-card glass">
-            <img src="${dish.image}" alt="${dish.name}" class="dish-img">
-            <div class="dish-info">
-              <div>
-                <div class="dish-title">${dish.name}</div>
-                <div class="dish-desc">${dish.desc}</div>
-              </div>
-              <div class="action-area">
-                ${actionHTML}
-              </div>
-            </div>
-          </div>
-        `;
+        return `${categoryHead}<div class="grid">${dishesHTML}</div>`;
       }).join('');
     }
 
@@ -624,7 +674,7 @@
       state.remarks = remarksEl.value;
       const total = getTotalCount();
 
-      let dishDetails = dishes
+      let dishDetails = allDishes
         .filter(d => state.cart[d.id] > 0)
         .map(d => `- ${d.name} x${state.cart[d.id]}`)
         .join('\n\n');
